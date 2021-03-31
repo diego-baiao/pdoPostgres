@@ -6,4 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Config\\Connection' => $baseDir . '/config/Connection.php',
+    'Config\\IConn' => $baseDir . '/config/IConn.php',
 );
