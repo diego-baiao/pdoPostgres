@@ -1,50 +1,63 @@
 <?php
-namespace Config; 
-
-require_once("IConn.php");
+namespace Config;
 
 class Connection implements IConn {
 
-    private string  $db_driver;
-    private string  $db_host; 
-    private int     $db_port; 
-    private string  $db_name;
-    private string  $db_user;
-    private string  $db_password; 
-        
-    function __construct($db_driver = null, $db_host = null, $db_port = null, $db_name = null, $db_user = null, $db_password = null){
+  /**
+   * Connection
+   * @var type
+   */
+  private static $conn;
 
-        $this->db_driver    =   $db_driver;
-        $this->db_host      =   $db_host;
-        $this->db_port      =   $db_port;
-        $this->db_name      =   $db_name;
-        $this->db_user      =   $db_user;
-        $this->db_password  =   $db_password;
+  /**
+   * Connect to the database and return an instance of \PDO object
+   * @return \PDO
+   * @throws \Exception
+   */
+  public function connect() {
+
+      // read parameters in the ini configuration file
+      $params = parse_ini_file('database.ini');
+      if ($params === false) {
+          throw new \Exception("Error reading database configuration file");
+      }
+      // connect to the postgresql database
+      $conStr = sprintf("pgsql:host=%s;port=%d;dbname=%s;user=%s;password=%s",
+              $params['host'],
+              $params['port'],
+              $params['database'],
+              $params['user'],
+              $params['password']);
+
+      $pdo = new \PDO($conStr);
+      $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+      return $pdo;
+  }
+
+  /**
+   * return an instance of the Connection object
+   * @return type
+   */
+  public static function get() {
+    if (null === static::$conn) {
+        static::$conn = new static();
     }
 
-    function openConn(){
-        $db_mount = $this->db_driver.":host=".$this->db_host." port=".$this->db_port." dbname=".$this->db_name." user=".$this->db_user." password=".$this->db_password;
+    return static::$conn;
+  }
 
-        try {
-            return $this->db_connect = new \PDO ($db_mount);
-        } catch (\Throwable $th) {
-            throw $th;
-        }
-    } 
+  protected function __construct() {
 
-    function statusConn(){
-        if ($this->db_connect) {
-            echo "<h3>O sistema está conectado à  [$this->db_name] em [$this->db_host].</h3>";
-        }else{
-            echo "<h3>O sistema não está conectado à  [$this->db_name] em [$this->db_host].</h3>";
-        }
-    }
+  }
 
-    function closeConn(){
-        if ($this->db_connect) {
-            @pg_close($this->db_connect);
-            echo "<h3>Conexão encerrada à [$this->db_name] em [$this->db_host].</h3>";
-        }
-    }
+  private function __clone() {
+
+  }
+
+  private function __wakeup() {
+
+  }
 
 }
+?>

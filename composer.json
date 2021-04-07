@@ -3,6 +3,7 @@
     "description": "Upload and Generation",
     "autoload": {
         "psr-4": {
+          "App\\": "app/",
           "Config\\": "config/"
         }
     }
